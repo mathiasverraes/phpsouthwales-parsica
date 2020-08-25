@@ -19,7 +19,8 @@
             "Verraes\\PHPSouthWales\\": "src/"
         },
         "files": [
-            "src/parsers.php"
+            "src/your_code.php",
+            "src/freebies.php"
         ]
     },
     "autoload-dev": {

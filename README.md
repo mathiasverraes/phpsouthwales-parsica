@@ -1,19 +1,23 @@
 # phpsouthwales-parsica
 
-Setup: 
+## Setup 
 
 ```bash
 composer install
 ```
 
-Run tests:
- 
+## Get Started
+
+Run the tests.
+
 ```bash
 composer test
 ```
 
-Resources: 
+The first test should fail. Fix the code in `/src`. When the test passes, the next one should fail.
 
-- [Parsica documentation](parsica.verraes.net)
+## Resources 
+
+- [Parsica documentation](https://parsica.verraes.net)
 - [JSON grammar](https://www.json.org/json-en.html)
 
