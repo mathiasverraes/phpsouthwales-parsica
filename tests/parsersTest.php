@@ -94,7 +94,7 @@ final class parsersTest extends TestCase
 
     /**
      * @test
-     * @ depends collect
+     * @depends collect
      */
     public function atLeastOne()
     {
