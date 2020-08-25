@@ -17,7 +17,7 @@ use function Verraes\Parsica\{alphaChar,
     sequence,
     string
 };
-use function Verraes\PHPSouthWales\{my_first_parser, ws};
+use function Verraes\PHPSouthWales\{whitespace};
 
 final class parsersTest extends TestCase
 {
