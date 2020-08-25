@@ -14,7 +14,7 @@ Run the tests.
 composer test
 ```
 
-The first test should fail. Fix the code in `/src`. When the test passes, the next one should fail.
+The first test should fail. Fix the code in `/tests/parsersTest`. Whenever you make a test pass, the next test will fail.
 
 ## Resources 
 
