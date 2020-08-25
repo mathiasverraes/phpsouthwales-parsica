@@ -126,7 +126,7 @@ final class parsersTest extends TestCase
      */
     public function sepBy1()
     {
-        $parser = sepBy1($SEPARATOR, $PARSER)->map($SOMETHING);
+        $parser = sepBy1($SEPARATOR, $PARSER);
 
         $input = "1.5+2+3.5";
         $expected = 7.0;
