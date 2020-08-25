@@ -12,13 +12,15 @@ use function Verraes\Parsica\{alphaChar,
     char,
     collect,
     digitChar,
+    eof,
     float,
+    keepFirst,
     punctuationChar,
     recursive,
     sepBy1,
     sequence,
     string};
-use function Verraes\PHPSouthWales\{whitespace};
+use function Verraes\PHPSouthWales\{true, whitespace};
 
 final class parsersTest extends TestCase
 {
@@ -136,7 +138,29 @@ final class parsersTest extends TestCase
 
     /**
      * @test
-     * @depends between
+     * @depends sepBy1
+     */
+    public function eof()
+    {
+        $word = atLeastOne(alphaChar());
+
+        $input = "something!!!";
+        $expected = "something";
+        // This succeeds...
+        $this->assertParses($input, $word, $expected);
+        // ... but we want it to fail when there is additional input beyond the alpha chars.
+
+        $parser = $SOMETHING(
+            $word,
+            $SOMETHING
+        );
+
+        $this->assertParseFails($input, $parser, null, "Hint: ()ɟoǝ ǝs∩");
+    }
+
+    /**
+     * @test
+     * @depends eof
      */
     public function recurse()
     {
@@ -166,11 +190,13 @@ final class parsersTest extends TestCase
 
     /**
      * @test
-     * @depends
+     * @depends recurse
      */
     public function true()
     {
-        // We'll build a JSON parser. First, well need
+        // We'll build a JSON parser now.
+        // JSON has true, false, and null keywords, let's start with those.
+        // Fix the true() parser in /src/JSON.php.
 
         $parser = true();
 
@@ -211,11 +237,11 @@ final class parsersTest extends TestCase
      */
     public function whitespace()
     {
-        // You get the ws() parser for free. It gets rid of whitespace for you.
-        $parser = ws();
+        // You deserve a break, so you get the whitespace() parser as a gift. It consumes all the whitespace.
+        $parser = whitespace();
 
         $input = "  \n \r \t something";
-        $expected = null;
+        $expected = $WHAT_IS_THE_OUTPUT;
         $this->assertParses($input, $parser, $expected);
         $this->assertRemainder($input, $parser, "something");
     }
