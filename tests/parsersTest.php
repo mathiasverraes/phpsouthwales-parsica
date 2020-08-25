@@ -3,22 +3,9 @@
 namespace Tests\Verraes\PHPSouthWales;
 
 use PHPUnit\Framework\TestCase;
-use Verraes\Parsica\JSON\JSON;
 use Verraes\Parsica\Parser;
 use Verraes\Parsica\PHPUnit\ParserAssertions;
-use function Verraes\Parsica\{alphaChar,
-    alphaNumChar,
-    atLeastOne,
-    between,
-    char,
-    collect,
-    float,
-    punctuationChar,
-    recursive,
-    sepBy1,
-    sequence,
-    string
-};
+use function Verraes\Parsica\{alphaChar, alphaNumChar, atLeastOne, between, char, collect, float, punctuationChar, recursive, sepBy1, sequence, string};
 use function Verraes\PHPSouthWales\{true, whitespace};
 
 final class parsersTest extends TestCase
@@ -410,7 +397,7 @@ final class parsersTest extends TestCase
         $this->assertEquals($native, $parsica);
     }
 
-    /** 
+    /**
      * @test
      * @depends compare_to_json_decode
      */
