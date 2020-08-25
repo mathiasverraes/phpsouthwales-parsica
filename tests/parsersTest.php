@@ -3,6 +3,7 @@
 namespace Tests\Verraes\PHPSouthWales;
 
 use PHPUnit\Framework\TestCase;
+use Verraes\Parsica\JSON\JSON;
 use Verraes\Parsica\Parser;
 use Verraes\Parsica\PHPUnit\ParserAssertions;
 use function Verraes\Parsica\{alphaChar,
@@ -11,15 +12,13 @@ use function Verraes\Parsica\{alphaChar,
     between,
     char,
     collect,
-    digitChar,
-    eof,
     float,
-    keepFirst,
     punctuationChar,
     recursive,
     sepBy1,
     sequence,
-    string};
+    string
+};
 use function Verraes\PHPSouthWales\{true, whitespace};
 
 final class parsersTest extends TestCase
@@ -87,7 +86,7 @@ final class parsersTest extends TestCase
             $SOMETING,
             $SOMETHING,
             $SOMETHING->map($SOMETHING)
-        )->map(fn(array $output)=> new Money($SOMETHING, $SOMETHING));
+        )->map(fn(array $output) => new Money($SOMETHING, $SOMETHING));
 
         $input = "EUR 5";
         $expected = new Money(5, "EUR");
@@ -265,6 +264,178 @@ final class parsersTest extends TestCase
         $expectedRemainder = "bar";
         $this->assertRemainder($input, $parser, $expectedRemainder);
 
+    }
+
+
+    /**
+     * @test
+     * @depends token
+     */
+    public function using_token()
+    {
+        // Use token() inside the true(), false(), and null() parsers
+
+        $this->assertParses("true    ", true(), true);
+        $this->assertParses("false \t  ", false(), false);
+        $this->assertParses("null\n\n  ", null(), null);
+
+        // Remember to use token() for all the other components of the JSON parser
+    }
+
+    /**
+     * @test
+     * @depends using_token
+     */
+    public function number()
+    {
+        // You can use float(), or implement this from scratch if you like
+
+        $this->assertParses("0", number(), 0.0);
+        $this->assertParses("0.15", number(), 0.15);
+        $this->assertParses("0.10", number(), 0.1);
+        $this->assertParses("-0.1", number(), -0.1);
+        $this->assertParses("1.2345678", number(), 1.2345678);
+        $this->assertParses("-1.2345678  ", number(), -1.2345678);
+        $this->assertParses("-1.23456789E+123", number(), -1.23456789E+123);
+        $this->assertParses("-1.23456789e-123", number(), -1.23456789E-123);
+        $this->assertParses("-1E-123  ", number(), -1E-123);
+        $this->assertParses("-1E-123          ", number(), -1E-123);
+    }
+
+    /**
+     * @test
+     * @depends number
+     */
+    public function stringLiteral()
+    {
+        // You get stringLiteral for free, but perhaps write some tests here to understand how handles escaped characters?
+        $this->assertTrue(false);// just a placeholder
+    }
+
+
+    /**
+     * @test
+     * @depends      stringLiteral
+     * @dataProvider arrayExamples
+     */
+    public function jsonArray(string $input, $expected)
+    {
+        // JSON arrays are lists of elements, wrapped in [], separated by comma's
+        // Values are any of these:
+        // object, array, stringLiteral, number, true, false, null
+        // (We don't have object yet, that's next)
+
+        $parser = jsonArray();
+        $this->assertParses($input, $parser, $expected);
+    }
+
+    public function arrayExamples()
+    {
+        return [
+            ['[]', []],
+            ['[ ] ', []],
+            ['[ 1 ] ', [1.0]],
+            ['[ true ] ', [true]],
+            ['[ 1.23, "abc", null, false ] ', [1.23, "abc", null, false]],
+        ];
+    }
+
+    /**
+     * @test
+     * @depends jsonArray
+     */
+    public function member()
+    {
+        // A member is a key and value stringLiterals, separated by a colon.
+        // Remember to use token()
+        $input = '"foo": "bar"';
+        $parser = member();
+        $this->assertParses($input, $parser, ["foo", "bar"]);
+    }
+
+    /**
+     * @test
+     * @depends member
+     */
+    public function object()
+    {
+        $input = '{"foo":"bar","bar":"foo"}';
+        $parser = object();
+        $this->assertParses($input, $parser, (object)["foo" => "bar", "bar" => "foo"]);
+    }
+
+    public static function JSONExamples(): array
+    {
+        return [
+            ['true'],
+            ['false'],
+            ['null'],
+            ['"abc"'],
+            ['{"a b":"c d"}'],
+            [' { " a b  " : " c  d " } '],
+            [' [ { " a b  " : " c  d " } ] '],
+            [' [ { " a b  " : " c  d " } , { "ef" : "gh" } ] '],
+            [<<<JSON
+                [
+                    -1.23,
+                    null,
+                    true,
+                    [
+                        [
+                            {
+                                "a": true
+                            },
+                            {
+                                "b": false,
+                                "c": -1.23456789E+123
+                            }
+                        ]
+                    ]
+                ]
+                JSON,
+            ],
+            [file_get_contents(__DIR__ . '/../composer.json')],
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider JSONExamples
+     * @depends object
+     */
+    public function compare_to_json_decode(string $input)
+    {
+        $native = json_decode($input);
+        $parsica = json()->tryString($input)->output();
+        $this->assertEquals($native, $parsica);
+    }
+
+    /** 
+     * @test
+     * @depends compare_to_json_decode
+     */
+    public function the_end()
+    {
+        $ascii = <<<ASCII
+
+Congratulations, you made it!
+You win a Hypsilophodont!
+
+                            ___......__             _
+                        _.-'           ~-_       _.=a~~-_
+--=====-.-.-_----------~   .--.       _   -.__.-~ ( ___===>
+              '''--...__  (    \ \\\ { )       _.-~
+                        =_ ~_  \\-~~~//~~~~-=-~
+                         |-=-~_ \\   \\
+                         |_/   =. )   ~}
+                         |}      ||
+                        //       ||
+                      _//        {{
+                   '='~'          \\_    =
+                                   ~~'
+ASCII;
+
+        $this->assertTrue(false, $ascii);
     }
 
 
