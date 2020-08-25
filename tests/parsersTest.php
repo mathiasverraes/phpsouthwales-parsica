@@ -26,11 +26,11 @@ final class parsersTest extends TestCase
     /** @test */
     public function my_first_parser()
     {
-        $parser = string("foo");
+        $parser = string("bar");
 
-        $input = "bar";
+        $input = "foo";
         $expected = "foo";
-        $this->assertParses($input, $parser, $expected, "Adapt the parser so it looks for bar instead of foo");
+        $this->assertParses($input, $parser, $expected, "Fix \$parser");
     }
 
     /**
@@ -117,7 +117,7 @@ final class parsersTest extends TestCase
 
     /**
      * @test
-     * @ depends between
+     * @depends between
      */
     public function sepBy1()
     {
