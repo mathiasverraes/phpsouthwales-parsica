@@ -10,13 +10,14 @@ use function Verraes\Parsica\{alphaChar,
     atLeastOne,
     between,
     char,
+    collect,
+    digitChar,
     float,
     punctuationChar,
     recursive,
     sepBy1,
     sequence,
-    string
-};
+    string};
 use function Verraes\PHPSouthWales\{whitespace};
 
 final class parsersTest extends TestCase
@@ -80,16 +81,20 @@ final class parsersTest extends TestCase
      */
     public function collect()
     {
-        $parser = $SOMETHING;
+        $parser = collect(
+            $SOMETING,
+            $SOMETHING,
+            $SOMETHING->map($SOMETHING)
+        )->map(fn(array $output)=> new Money($SOMETHING, $SOMETHING));
 
         $input = "EUR 5";
         $expected = new Money(5, "EUR");
-        $this->assertParses($input, $parser, $expected, "Hint: ()dɐɯ puɐ '()ʇᴉƃᴉp '()ʇɔǝlloɔ ǝsn");
+        $this->assertParses($input, $parser, $expected);
     }
 
     /**
      * @test
-     * @depends collect
+     * @ depends collect
      */
     public function atLeastOne()
     {
@@ -241,10 +246,10 @@ final class parsersTest extends TestCase
 
 class Money
 {
-    private int $amount;
+    private float $amount;
     private string $currency;
 
-    function __construct(int $amount, string $currency)
+    function __construct(float $amount, string $currency)
     {
         $this->amount = $amount;
         $this->currency = $currency;
